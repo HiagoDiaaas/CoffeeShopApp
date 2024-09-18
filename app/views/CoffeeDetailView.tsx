@@ -1,57 +1,59 @@
+// app/views/CoffeeDetailView.tsx
+
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import CoffeeService from '../services/CoffeeService';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { View, Text, Button, StyleSheet } from 'react-native';
+import Coffee from '../models/Coffee';
 
-type RootStackParamList = {
-  CoffeeList: undefined;
-  CoffeeDetail: { coffeeId: number };
-};
+interface CoffeeDetailProps {
+  deleteCoffee: (id: number) => void;
+  navigation: any;
+  route: any;
+}
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CoffeeDetail'>;
+const CoffeeDetailView: React.FC<CoffeeDetailProps> = ({
+  deleteCoffee,
+  navigation,
+  route,
+}) => {
+  const { coffee } = route.params;
 
-const CoffeeDetailView: React.FC<Props> = ({ route }) => {
-  const { coffeeId } = route.params;
-  const coffee = CoffeeService.getCoffeeById(coffeeId);
+  const handleDeleteCoffee = () => {
+    deleteCoffee(coffee.id);
+    navigation.goBack();
+  };
 
-  if (!coffee) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.error}>Coffee not found.</Text>
-      </View>
-    );
-  }
+  const handleEditCoffee = () => {
+    navigation.navigate('EditCoffee', { coffee });
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.name}>{coffee.name}</Text>
+      <Text style={styles.title}>{coffee.name}</Text>
       <Text style={styles.description}>{coffee.description}</Text>
       <Text style={styles.price}>Price: ${coffee.price.toFixed(2)}</Text>
+      <Button title="Edit Coffee" onPress={handleEditCoffee} />
+      <Button title="Delete Coffee" onPress={handleDeleteCoffee} color="red" />
     </View>
   );
 };
 
+export default CoffeeDetailView;
+
 const styles = StyleSheet.create({
   container: {
-    padding: 15,
+    flex: 1,
+    padding: 16,
   },
-  name: {
+  title: {
     fontSize: 24,
-    color: '#333',
+    marginBottom: 12,
   },
   description: {
-    marginVertical: 10,
-    fontSize: 16,
-    color: '#666',
+    fontSize: 18,
+    marginBottom: 12,
   },
   price: {
     fontSize: 18,
-    color: '#333',
-  },
-  error: {
-    fontSize: 18,
-    color: 'red',
+    marginBottom: 24,
   },
 });
-
-export default CoffeeDetailView;
