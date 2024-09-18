@@ -14,22 +14,4 @@ export default class CoffeeService {
   static getCoffeeById(id: number): Coffee | undefined {
     return coffees.find((coffee) => coffee.id === id);
   }
-
-  static addCoffee(coffee: Coffee): void {
-    coffees.push(coffee);
-  }
-
-  static updateCoffee(updatedCoffee: Coffee): void {
-    const index = coffees.findIndex((coffee) => coffee.id === updatedCoffee.id);
-    if (index !== -1) {
-      coffees[index] = updatedCoffee;
-    }
-  }
-
-  static deleteCoffee(id: number): void {
-    const index = coffees.findIndex((coffee) => coffee.id === id);
-    if (index !== -1) {
-      coffees.splice(index, 1);
-    }
-  }
 }

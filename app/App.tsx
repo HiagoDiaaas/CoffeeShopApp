@@ -5,6 +5,8 @@
  * @format
  */
 
+// app/App.tsx
+
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -13,98 +15,101 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import your views
 import CoffeeListView from './views/CoffeeListView';
-import CoffeeDetailView from './views/CoffeeDetailView';
-import AddCoffeeView from './views/AddCoffeeView';
-import EditCoffeeView from './views/EditCoffeeView';
+import OrderDetailView from './views/OrderDetailView';
+import AddOrderView from './views/AddOrderView';
+import EditOrderView from './views/EditOrderView';
 
-// Import the Coffee class
-import Coffee from './models/Coffee';
+// Import models
+import Order from './models/Order';
+import OrderListView from './views/OrderListView';
 
 type RootStackParamList = {
-  CoffeeList: undefined;
-  CoffeeDetail: { coffee: Coffee };
-  AddCoffee: undefined;
-  EditCoffee: { coffee: Coffee };
+  OrderList: undefined;
+  OrderDetail: { order: Order };
+  AddOrder: undefined;
+  EditOrder: { order: Order };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const App: React.FC = () => {
-  const [coffees, setCoffees] = useState<Coffee[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  // Load coffees from AsyncStorage on mount
+  // Load orders from AsyncStorage on mount
   useEffect(() => {
-    const loadCoffees = async () => {
+    const loadOrders = async () => {
       try {
-        const jsonValue = await AsyncStorage.getItem('coffees');
+        const jsonValue = await AsyncStorage.getItem('orders');
         if (jsonValue != null) {
-          const parsedCoffees = JSON.parse(jsonValue);
-          const loadedCoffees = parsedCoffees.map(
-            (coffeeData: any) =>
-              new Coffee(
-                coffeeData.id,
-                coffeeData.name,
-                coffeeData.description,
-                coffeeData.price
+          const parsedOrders = JSON.parse(jsonValue);
+          const loadedOrders = parsedOrders.map(
+            (orderData: any) =>
+              new Order(
+                orderData.id,
+                orderData.coffees
               )
           );
-          setCoffees(loadedCoffees);
+          setOrders(loadedOrders);
         }
       } catch (e) {
-        console.error('Failed to load coffees.', e);
+        console.error('Failed to load orders.', e);
       }
     };
 
-    loadCoffees();
+    loadOrders();
   }, []);
 
-  // Save coffees to AsyncStorage whenever they change
+  // Save orders to AsyncStorage whenever they change
   useEffect(() => {
-    const saveCoffees = async () => {
+    const saveOrders = async () => {
       try {
-        const jsonValue = JSON.stringify(coffees);
-        await AsyncStorage.setItem('coffees', jsonValue);
+        const jsonValue = JSON.stringify(orders);
+        await AsyncStorage.setItem('orders', jsonValue);
       } catch (e) {
-        console.error('Failed to save coffees.', e);
+        console.error('Failed to save orders.', e);
       }
     };
 
-    saveCoffees();
-  }, [coffees]);
+    saveOrders();
+  }, [orders]);
 
-  const addCoffee = (coffee: Coffee) => {
-    setCoffees([...coffees, coffee]);
+  const addOrder = (order: Order) => {
+    setOrders([...orders, order]);
   };
 
-  const updateCoffee = (updatedCoffee: Coffee) => {
-    setCoffees(
-      coffees.map((coffee) =>
-        coffee.id === updatedCoffee.id ? updatedCoffee : coffee
+  const updateOrder = (updatedOrder: Order) => {
+    setOrders(
+      orders.map((order) =>
+        order.id === updatedOrder.id ? updatedOrder : order
       )
     );
   };
 
-  const deleteCoffee = (id: number) => {
-    setCoffees(coffees.filter((coffee) => coffee.id !== id));
+  const deleteOrder = (id: number) => {
+    setOrders(orders.filter((order) => order.id !== id));
   };
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="CoffeeList">
-        <Stack.Screen name="CoffeeList" options={{ title: 'Coffees' }}>
-          {(props) => <CoffeeListView {...props} coffees={coffees} />}
-        </Stack.Screen>
-        <Stack.Screen name="CoffeeDetail" options={{ title: 'Coffee Details' }}>
+      <Stack.Navigator initialRouteName="OrderList">
+        <Stack.Screen name="OrderList" options={{ title: 'Orders' }}>
           {(props) => (
-            <CoffeeDetailView {...props} deleteCoffee={deleteCoffee} />
+            <OrderListView {...props} orders={orders} />
           )}
         </Stack.Screen>
-        <Stack.Screen name="AddCoffee" options={{ title: 'Add New Coffee' }}>
-          {(props) => <AddCoffeeView {...props} addCoffee={addCoffee} />}
-        </Stack.Screen>
-        <Stack.Screen name="EditCoffee" options={{ title: 'Edit Coffee' }}>
+        <Stack.Screen name="OrderDetail" options={{ title: 'Order Details' }}>
           {(props) => (
-            <EditCoffeeView {...props} updateCoffee={updateCoffee} />
+            <OrderDetailView {...props} deleteOrder={deleteOrder} />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="AddOrder" options={{ title: 'Add New Order' }}>
+          {(props) => (
+            <AddOrderView {...props} addOrder={addOrder} />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="EditOrder" options={{ title: 'Edit Order' }}>
+          {(props) => (
+            <EditOrderView {...props} updateOrder={updateOrder} />
           )}
         </Stack.Screen>
       </Stack.Navigator>
@@ -113,4 +118,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
