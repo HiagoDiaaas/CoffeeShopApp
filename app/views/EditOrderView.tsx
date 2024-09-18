@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, FlatList, Button, StyleSheet } from 'react-native';
+import { View, FlatList, Button, StyleSheet, Alert } from 'react-native';
 import Coffee from '../models/Coffee';
 import CoffeeService from '../services/CoffeeService';
 import CoffeeItem from './CoffeeItem';
@@ -17,23 +17,27 @@ const EditOrderView: React.FC<EditOrderProps> = ({
   route,
 }) => {
   const { order } = route.params as { order: Order };
-  const [selectedCoffees, setSelectedCoffees] = useState<Coffee[]>(
-    order.coffees
-  );
+  const [selectedCoffees, setSelectedCoffees] = useState<Coffee[]>(order.coffees);
 
   const coffees = CoffeeService.getAllCoffees();
 
   const toggleCoffeeSelection = (coffee: Coffee) => {
     if (selectedCoffees.some((c) => c.id === coffee.id)) {
+      // Remove coffee from selection
       setSelectedCoffees(selectedCoffees.filter((c) => c.id !== coffee.id));
     } else {
+      // Add coffee to selection
       setSelectedCoffees([...selectedCoffees, coffee]);
     }
   };
 
+  const isCoffeeSelected = (coffee: Coffee) => {
+    return selectedCoffees.some((c) => c.id === coffee.id);
+  };
+
   const handleUpdateOrder = () => {
     if (selectedCoffees.length === 0) {
-      alert('Please select at least one coffee.');
+      Alert.alert('No Coffee Selected', 'Please select at least one coffee.');
       return;
     }
 
@@ -50,8 +54,8 @@ const EditOrderView: React.FC<EditOrderProps> = ({
         renderItem={({ item }) => (
           <CoffeeItem
             coffee={item}
-            onPress={() => toggleCoffeeSelection(item)}
-            selected={selectedCoffees.some((c) => c.id === item.id)}
+            onPress={toggleCoffeeSelection}
+            selected={isCoffeeSelected(item)}
           />
         )}
         extraData={selectedCoffees}

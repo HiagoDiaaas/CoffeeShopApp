@@ -1,5 +1,7 @@
+// app/views/AddOrderView.tsx
+
 import React, { useState } from 'react';
-import { View, FlatList, Button, StyleSheet } from 'react-native';
+import { View, FlatList, Button, StyleSheet, Alert } from 'react-native';
 import Coffee from '../models/Coffee';
 import CoffeeService from '../services/CoffeeService';
 import CoffeeItem from './CoffeeItem';
@@ -23,9 +25,13 @@ const AddOrderView: React.FC<AddOrderProps> = ({ addOrder, navigation }) => {
     }
   };
 
+  const isCoffeeSelected = (coffee: Coffee) => {
+    return selectedCoffees.some((c) => c.id === coffee.id);
+  };
+
   const handleAddOrder = () => {
     if (selectedCoffees.length === 0) {
-      alert('Please select at least one coffee.');
+      Alert.alert('No Coffee Selected', 'Please select at least one coffee.');
       return;
     }
 
@@ -42,7 +48,8 @@ const AddOrderView: React.FC<AddOrderProps> = ({ addOrder, navigation }) => {
         renderItem={({ item }) => (
           <CoffeeItem
             coffee={item}
-            onPress={() => toggleCoffeeSelection(item)}
+            onPress={toggleCoffeeSelection}
+            selected={isCoffeeSelected(item)}
           />
         )}
         extraData={selectedCoffees}

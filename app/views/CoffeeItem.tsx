@@ -8,11 +8,13 @@ interface CoffeeItemProps {
   selected?: boolean;
 }
 
-const CoffeeItem: React.FC<CoffeeItemProps> = ({ coffee, onPress, selected }) => (
-  <TouchableOpacity onPress={() => onPress(coffee)} style={styles.container}>
+const CoffeeItem: React.FC<CoffeeItemProps> = ({ coffee, onPress, selected = false }) => (
+  <TouchableOpacity
+    onPress={() => onPress(coffee)}
+    style={[styles.container, selected && styles.selectedContainer]}
+  >
     <Text style={styles.name}>{coffee.name}</Text>
     <Text style={styles.price}>${coffee.price.toFixed(2)}</Text>
-    {selected && <Text style={styles.selected}>Selected</Text>}
   </TouchableOpacity>
 );
 
@@ -23,7 +25,9 @@ const styles = StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderColor: '#eee',
-    backgroundColor: '#fff',
+  },
+  selectedContainer: {
+    backgroundColor: '#d0f0c0', // Light green when selected
   },
   name: {
     fontSize: 18,
@@ -31,11 +35,6 @@ const styles = StyleSheet.create({
   },
   price: {
     color: '#999',
-    marginTop: 5,
-  },
-  selected: {
-    color: 'green',
-    fontWeight: 'bold',
     marginTop: 5,
   },
 });

@@ -1,10 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 // app/App.tsx
 
 import React, { useState, useEffect } from 'react';
@@ -13,15 +6,16 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Import your views
-import CoffeeListView from './views/CoffeeListView';
+// Import views
+import OrderListView from './views/OrderListView';
 import OrderDetailView from './views/OrderDetailView';
 import AddOrderView from './views/AddOrderView';
 import EditOrderView from './views/EditOrderView';
 
 // Import models
 import Order from './models/Order';
-import OrderListView from './views/OrderListView';
+import Coffee from './models/Coffee';
+import CoffeeService from './services/CoffeeService';
 
 type RootStackParamList = {
   OrderList: undefined;
@@ -42,13 +36,18 @@ const App: React.FC = () => {
         const jsonValue = await AsyncStorage.getItem('orders');
         if (jsonValue != null) {
           const parsedOrders = JSON.parse(jsonValue);
-          const loadedOrders = parsedOrders.map(
-            (orderData: any) =>
-              new Order(
-                orderData.id,
-                orderData.coffees
-              )
-          );
+          const loadedOrders = parsedOrders.map((orderData: any) => {
+            const coffees = orderData.coffees.map((coffeeId: number) => {
+              const coffee = CoffeeService.getCoffeeById(coffeeId);
+              if (coffee) {
+                return coffee;
+              } else {
+                console.warn(`Coffee with id ${coffeeId} not found.`);
+                return null;
+              }
+            }).filter((coffee: Coffee | null): coffee is Coffee => coffee !== null);
+            return new Order(orderData.id, coffees);
+          });
           setOrders(loadedOrders);
         }
       } catch (e) {
@@ -63,7 +62,12 @@ const App: React.FC = () => {
   useEffect(() => {
     const saveOrders = async () => {
       try {
-        const jsonValue = JSON.stringify(orders);
+        const jsonValue = JSON.stringify(
+          orders.map((order) => ({
+            id: order.id,
+            coffees: order.coffees.map((coffee) => coffee.id),
+          }))
+        );
         await AsyncStorage.setItem('orders', jsonValue);
       } catch (e) {
         console.error('Failed to save orders.', e);
@@ -93,9 +97,7 @@ const App: React.FC = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="OrderList">
         <Stack.Screen name="OrderList" options={{ title: 'Orders' }}>
-          {(props) => (
-            <OrderListView {...props} orders={orders} />
-          )}
+          {(props) => <OrderListView {...props} orders={orders} />}
         </Stack.Screen>
         <Stack.Screen name="OrderDetail" options={{ title: 'Order Details' }}>
           {(props) => (
@@ -103,9 +105,7 @@ const App: React.FC = () => {
           )}
         </Stack.Screen>
         <Stack.Screen name="AddOrder" options={{ title: 'Add New Order' }}>
-          {(props) => (
-            <AddOrderView {...props} addOrder={addOrder} />
-          )}
+          {(props) => <AddOrderView {...props} addOrder={addOrder} />}
         </Stack.Screen>
         <Stack.Screen name="EditOrder" options={{ title: 'Edit Order' }}>
           {(props) => (
