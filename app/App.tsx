@@ -96,7 +96,7 @@ const App: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="OrderList">
-        <Stack.Screen name="OrderList" options={{ title: 'Orders' }}>
+        <Stack.Screen name="OrderList" options={{ title: 'Coffee Shop Orders' }}>
           {(props) => <OrderListView {...props} orders={orders} />}
         </Stack.Screen>
         <Stack.Screen name="OrderDetail" options={{ title: 'Order Details' }}>
